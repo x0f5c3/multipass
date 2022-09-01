@@ -136,18 +136,23 @@ mp::ReturnCode cmd::Launch::run(mp::ArgParser* parser)
 
     if (MP_SETTINGS.get_as<bool>(mounts_key))
     {
-        auto has_home_mount = std::count_if(mount_routes.begin(), mount_routes.end(),
-                                            [](const auto& route) { return route.second == home_automount_dir; });
-
-        if (request.instance_name() == petenv_name.toStdString() && !has_home_mount)
+        // if no mounts were set through `--mount`, use the default mounts
+        if (mount_routes.empty())
         {
-            try
+            if (request.instance_name() == petenv_name.toStdString())
             {
-                mount_routes.emplace_back(QString::fromLocal8Bit(mpu::snap_real_home_dir()), home_automount_dir);
+                try
+                {
+                    mount_routes.emplace_back(QString::fromLocal8Bit(mpu::snap_real_home_dir()), home_automount_dir);
+                }
+                catch (const SnapEnvironmentException&)
+                {
+                    mount_routes.emplace_back(QDir::toNativeSeparators(QDir::homePath()), home_automount_dir);
+                }
             }
-            catch (const SnapEnvironmentException&)
+            else
             {
-                mount_routes.emplace_back(QDir::toNativeSeparators(QDir::homePath()), home_automount_dir);
+                parse_mount_routes(MP_SETTINGS.get(default_mount_key).split('\n', Qt::SkipEmptyParts));
             }
         }
 
@@ -343,17 +348,7 @@ mp::ParseCode cmd::Launch::parse_args(mp::ArgParser* parser)
     }
 
     if (parser->isSet(mountOption))
-    {
-        for (const auto& value : parser->values(mountOption))
-        {
-            // this is needed so that Windows absolute paths are not split at the colon following the drive letter
-            auto colon_split = QRegularExpression{R"(^[A-Za-z]:[\\/].*)"}.match(value).hasMatch();
-            auto mount_source = value.section(':', 0, colon_split);
-            auto mount_target = value.section(':', colon_split + 1);
-            mount_target = mount_target.isEmpty() ? mount_source : mount_target;
-            mount_routes.emplace_back(mount_source, mount_target);
-        }
-    }
+        parse_mount_routes(parser->values(mountOption));
 
     if (parser->isSet(cloudInitOption))
     {
@@ -589,4 +584,16 @@ bool cmd::Launch::ask_bridge_permission(multipass::LaunchReply& reply)
     }
 
     return false;
+}
+void multipass::cmd::Launch::parse_mount_routes(const QStringList& args)
+{
+    for (const auto& value : args)
+    {
+        // this is needed so that Windows absolute paths are not split at the colon following the drive letter
+        auto colon_split = QRegularExpression{R"(^[A-Za-z]:[\\/].*)"}.match(value).hasMatch();
+        auto mount_source = value.section(':', 0, colon_split);
+        auto mount_target = value.section(':', colon_split + 1);
+        mount_target = mount_target.isEmpty() ? mount_source : mount_target;
+        mount_routes.emplace_back(mount_source, mount_target);
+    }
 }
