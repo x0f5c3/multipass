@@ -117,6 +117,11 @@ mp::ParseCode cmd::Set::checked_prompt(const QString& key)
             mp::NewPassphrasePrompter prompter(term);
             val = QString::fromStdString(prompter.prompt());
         }
+        else if (key == default_mount_key)
+        {
+            val = QString::fromStdString(mp::MultiLinePrompter{term}.prompt(
+                "Insert each mount mapping on a new line as <host-path>[:<instance-path>]\nSubmit with EOF"));
+        }
         else
         {
             mp::PlainPrompter prompter(term);

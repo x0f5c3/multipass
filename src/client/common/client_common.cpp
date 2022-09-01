@@ -187,6 +187,7 @@ void mp::client::register_global_settings_handlers()
     settings.insert(std::make_unique<CustomSettingSpec>(mp::hotkey_key, default_hotkey(), [](QString val) {
         return mp::platform::interpret_setting(mp::hotkey_key, val);
     }));
+    settings.insert(std::make_unique<BasicSettingSpec>(mp::default_mount_key, ""));
 
     MP_SETTINGS.register_handler(
         std::make_unique<PersistentSettingsHandler>(persistent_settings_filename(), std::move(settings)));

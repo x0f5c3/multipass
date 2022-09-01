@@ -66,3 +66,14 @@ std::string mp::NewPassphrasePrompter::prompt(const std::string& text) const
 
     return passphrase;
 }
+
+std::string multipass::MultiLinePrompter::prompt(const std::string& text) const
+{
+    term->cout() << text << ":\n";
+    std::string mount_mappings;
+    std::string input;
+
+    while (term->cin() >> input)
+        mount_mappings += input + '\n';
+    return term->cin().eof() ? mount_mappings : throw mp::PromptException("Failed to read value");
+}

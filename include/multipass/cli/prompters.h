@@ -88,6 +88,14 @@ public:
 
     std::string prompt(const std::string& text = "Please re-enter passphrase") const override;
 };
+
+class MultiLinePrompter : public BasePrompter
+{
+public:
+    using BasePrompter::BasePrompter;
+
+    std::string prompt(const std::string& text) const override;
+};
 } // namespace multipass
 
 #endif // MULTIPASS_CLI_PROMPTERS_H
