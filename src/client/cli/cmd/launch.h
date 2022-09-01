@@ -54,6 +54,7 @@ private:
     ReturnCode mount(const ArgParser* parser, const QString& mount_source, const QString& mount_target);
     bool ask_bridge_permission(multipass::LaunchReply& reply);
     void parse_mount_routes(const QStringList& args);
+    void handle_default_mounts(const ArgParser* parser);
 
     LaunchRequest request;
     QString petenv_name;

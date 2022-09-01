@@ -61,6 +61,7 @@ constexpr auto winterm_key = "client.apps.windows-terminal.profiles"; // idem
 constexpr auto hotkey_key = "client.gui.hotkey";                      // idem
 constexpr auto mirror_key = "local.image.mirror";                     // idem; this defines the mirror of simple streams
 constexpr auto default_mount_key = "client.launch-defaults.mount";    // idem
+constexpr auto petenv_mount_home = "client.primary-mount-home";    // idem
 
 [[maybe_unused]] // hands off clang-format
 constexpr auto key_examples = {autostart_key, driver_key, mounts_key};

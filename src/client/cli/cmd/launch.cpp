@@ -138,23 +138,7 @@ mp::ReturnCode cmd::Launch::run(mp::ArgParser* parser)
     {
         // if no mounts were set through `--mount`, use the default mounts
         if (mount_routes.empty())
-        {
-            if (request.instance_name() == petenv_name.toStdString())
-            {
-                try
-                {
-                    mount_routes.emplace_back(QString::fromLocal8Bit(mpu::snap_real_home_dir()), home_automount_dir);
-                }
-                catch (const SnapEnvironmentException&)
-                {
-                    mount_routes.emplace_back(QDir::toNativeSeparators(QDir::homePath()), home_automount_dir);
-                }
-            }
-            else
-            {
-                parse_mount_routes(MP_SETTINGS.get(default_mount_key).split('\n', Qt::SkipEmptyParts));
-            }
-        }
+            handle_default_mounts(parser);
 
         for (const auto& [source, target] : mount_routes)
         {
@@ -595,5 +579,26 @@ void multipass::cmd::Launch::parse_mount_routes(const QStringList& args)
         auto mount_target = value.section(':', colon_split + 1);
         mount_target = mount_target.isEmpty() ? mount_source : mount_target;
         mount_routes.emplace_back(mount_source, mount_target);
+    }
+}
+
+void multipass::cmd::Launch::handle_default_mounts(const ArgParser* parser)
+{
+    if (request.instance_name() != petenv_name.toStdString())
+    {
+        parse_mount_routes(MP_SETTINGS.get(default_mount_key).split('\n', Qt::SkipEmptyParts));
+        return;
+    }
+
+    if (!MP_SETTINGS.get_as<bool>(petenv_mount_home))
+        return;
+
+    try
+    {
+        mount_routes.emplace_back(QString::fromLocal8Bit(mpu::snap_real_home_dir()), home_automount_dir);
+    }
+    catch (const SnapEnvironmentException&)
+    {
+        mount_routes.emplace_back(QDir::toNativeSeparators(QDir::homePath()), home_automount_dir);
     }
 }

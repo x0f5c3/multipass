@@ -42,6 +42,7 @@ namespace
 {
 const auto client_root = QStringLiteral("client");
 const auto autostart_default = QStringLiteral("true");
+const auto petenv_mount_home_default = QStringLiteral("true");
 
 QString default_hotkey()
 {
@@ -188,6 +189,7 @@ void mp::client::register_global_settings_handlers()
         return mp::platform::interpret_setting(mp::hotkey_key, val);
     }));
     settings.insert(std::make_unique<BasicSettingSpec>(mp::default_mount_key, ""));
+    settings.insert(std::make_unique<BoolSettingSpec>(mp::petenv_mount_home, petenv_mount_home_default));
 
     MP_SETTINGS.register_handler(
         std::make_unique<PersistentSettingsHandler>(persistent_settings_filename(), std::move(settings)));
