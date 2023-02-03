@@ -113,7 +113,22 @@ bool mp::AliasDict::add_alias(const std::string& alias, const mp::AliasDefinitio
 
 bool mp::AliasDict::exists_alias(const std::string& alias) const
 {
-    return (aliases.count(active_context) && aliases.at(active_context).count(alias));
+    for (const auto& context : aliases)
+    {
+        const auto& context_dict = context.second;
+
+        if (context_dict.find(alias) != context_dict.cend())
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool mp::AliasDict::is_alias_unique(const std::string& alias) const
+{
+    return get_alias_from_all_contexts(alias) ? true : false;
 }
 
 bool mp::AliasDict::remove_alias(const std::string& alias)
