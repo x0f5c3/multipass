@@ -261,8 +261,7 @@ message SnapshotOverviewInfoReport {
 }
 
 message InfoReply {
-    oneof info_contents
-    {
+    oneof info_contents {
         DetailedInfoReport details = 1;
         SnapshotOverviewInfoReport snapshot_overview = 2;
     }
