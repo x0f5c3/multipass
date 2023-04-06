@@ -22,10 +22,7 @@
 #include <multipass/format.h>
 #include <multipass/memory_size.h>
 
-#include <google/protobuf/util/time_util.h>
-
 namespace mp = multipass;
-namespace gpu = google::protobuf::util;
 
 namespace
 {
@@ -162,6 +159,9 @@ std::string mp::TableFormatter::format(const InfoReply& reply) const
     else if (reply.info_contents_case() == mp::InfoReply::kSnapshotOverview)
     {
         auto overview = reply.snapshot_overview().overview();
+        if (overview.empty())
+            return "No snapshots found.\n";
+
         const auto name_column_width = mp::format::column_width(
             overview.begin(), overview.end(), [](const auto& item) -> int { return item.instance_name().length(); },
             24);
@@ -175,20 +175,12 @@ std::string mp::TableFormatter::format(const InfoReply& reply) const
 
         const auto row_format = "{:<{}}{:<{}}{:<{}}{:<}\n";
 
-        if (overview.empty())
-            return "No snapshots found.\n";
-        else
-            fmt::format_to(std::back_inserter(buf), row_format, "Instance", name_column_width, "Snapshot",
-                           snapshot_column_width, "Parent", parent_column_width, "Comment");
+        fmt::format_to(std::back_inserter(buf), row_format, "Instance", name_column_width, "Snapshot",
+                       snapshot_column_width, "Parent", parent_column_width, "Comment");
 
-        std::sort(std::begin(overview), std::end(overview), [](const auto& a, const auto& b) {
-            return gpu::TimeUtil::TimestampToNanoseconds(a.fundamentals().creation_timestamp()) <
-                   gpu::TimeUtil::TimestampToNanoseconds(b.fundamentals().creation_timestamp());
-        });
-
-        for (const auto& item : overview)
+        for (const auto& item : format::sort_snapshots(overview))
         {
-            auto snapshot = item.fundamentals();
+            const auto snapshot = item.fundamentals();
             fmt::format_to(std::back_inserter(buf), row_format, item.instance_name(), name_column_width,
                            snapshot.snapshot_name(), snapshot_column_width,
                            snapshot.parent().empty() ? "--" : snapshot.parent(), parent_column_width,
