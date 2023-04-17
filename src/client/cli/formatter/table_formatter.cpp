@@ -62,9 +62,9 @@ std::string mp::TableFormatter::format(const InfoReply& reply) const
     fmt::memory_buffer buf;
     std::string output;
 
-    if (reply.info_contents_case() == mp::InfoReply::kDetails)
+    if (reply.info_contents_case() == mp::InfoReply::kDetailedReport)
     {
-        for (const auto& info : format::sorted(reply.details().details()))
+        for (const auto& info : format::sorted(reply.detailed_report().details()))
         {
             const auto& instance_details = info.instance_info();
 
@@ -153,7 +153,7 @@ std::string mp::TableFormatter::format(const InfoReply& reply) const
         }
 
         output = fmt::to_string(buf);
-        if (!reply.details().details().empty())
+        if (!reply.detailed_report().details().empty())
             output.pop_back();
         else
             output = "\n";
