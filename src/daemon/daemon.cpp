@@ -1698,19 +1698,31 @@ try // clang-format on
     // TODO@snapshots retrieve snapshot names to gather info
     auto fetch_snapshot_overview = [&](VirtualMachine& vm) {
         const auto& name = vm.vm_name;
-        auto overview = response.mutable_snapshot_overview()->add_overview();
-        auto fundamentals = overview->mutable_fundamentals();
 
-        overview->set_instance_name(name);
-        fundamentals->set_snapshot_name("snapshot1");
-        fundamentals->set_comment("This is a sample comment");
+        auto get_snapshot_info = [&](std::shared_ptr<const Snapshot> snapshot) {
+            auto overview = response.mutable_snapshot_overview()->add_overview();
+            auto fundamentals = overview->mutable_fundamentals();
+
+            overview->set_instance_name(name);
+            fundamentals->set_snapshot_name(snapshot->get_name());
+            fundamentals->set_parent(snapshot->get_parent_name());
+            fundamentals->set_comment(snapshot->get_comment());
+            // TODO@snapshots populate snapshot creation time once available
+        };
+
+        if (request->instances_map().map().at(name).snapshot_name_size() == 0)
+            for (const auto& snapshot : vm.view_snapshots())
+                get_snapshot_info(snapshot);
+        else
+            for (const auto& name : request->instances_map().map().at(name).snapshot_name())
+                get_snapshot_info(vm.get_snapshot(name));
 
         return grpc::Status::OK;
     };
 
     mp::InstanceNames instance_names;
-    for (const auto& n : request->instances_snapshots())
-        instance_names.add_instance_name(n.instance_name());
+    for (const auto& item : request->instances_map().map())
+        instance_names.add_instance_name(item.first);
 
     auto [instance_selection, status] =
         select_instances_and_react(operative_instances, deleted_instances, instance_names.instance_name(),
