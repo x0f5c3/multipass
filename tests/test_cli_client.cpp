@@ -403,7 +403,7 @@ auto make_info_function(const std::string& source_path = "", const std::string& 
 
         mp::InfoReply info_reply;
 
-        if (request.instances_snapshots(0).instance_name() == "primary")
+        if (request.instances_map().map().count("primary"))
         {
             auto vm_info = info_reply.mutable_detailed_report()->add_details();
             vm_info->set_name("primary");
