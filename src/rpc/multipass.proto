@@ -161,13 +161,12 @@ message FindReply {
     string log_line = 5;
 }
 
-message InstanceSnapshotPair {
-    string instance_name = 1;
-    optional string snapshot_name = 2; // if this is present, the msg specifies a snapshot; otherwise, an instance
+message InstanceSnapshotMap {
+    map<string, SnapshotNames> map = 1;
 }
 
 message InfoRequest {
-    repeated InstanceSnapshotPair instances_snapshots = 1;
+    InstanceSnapshotMap instances_map = 1;
     bool snapshot_overview = 2;
     int32 verbosity_level = 3;
     bool no_runtime_information = 4;
@@ -342,6 +341,10 @@ message PingReply {
 
 message InstanceNames {
     repeated string instance_name = 1;
+}
+
+message SnapshotNames {
+    repeated string snapshot_name = 1;
 }
 
 message RecoverRequest {
