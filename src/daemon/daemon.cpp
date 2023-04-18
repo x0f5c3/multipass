@@ -1695,7 +1695,6 @@ try // clang-format on
         return grpc::Status::OK;
     };
 
-    // TODO@snapshots retrieve snapshot names to gather info
     auto fetch_snapshot_overview = [&](VirtualMachine& vm) {
         const auto& name = vm.vm_name;
 
