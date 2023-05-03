@@ -34,6 +34,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
 
 if(MULTIPASS_ENABLE_FLUTTER_GUI)
   find_program(FLUTTER_EXECUTABLE flutter HINTS /snap/bin/ REQUIRED DOC "The Flutter executable")
+  find_package(Protobuf REQUIRED)
 endif(MULTIPASS_ENABLE_FLUTTER_GUI)
 
 string(TOLOWER "${CMAKE_BUILD_TYPE}" cmake_build_type_lower)
